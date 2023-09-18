@@ -6,7 +6,7 @@ Utilities to run the drone
 from itertools import cycle
 
 import rclpy
-from msg_srv.msg import RCMessage
+from swift_msgs.msg import RCMessage
 from yamspy import MSPy
 
 CMDS_ORDER = ["roll", "pitch", "throttle", "yaw", "aux1", "aux2", "aux3", "aux4"]

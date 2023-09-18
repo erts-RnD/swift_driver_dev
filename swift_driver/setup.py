@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'luminosity_drone_driver'
+package_name = 'swift_driver'
 
 setup(
     name=package_name,
@@ -15,12 +15,12 @@ setup(
     zip_safe=True,
     maintainer='arunser',
     maintainer_email='stormbreaker.004@gmail.com',
-    description='The luminosity_drone_driver package',
+    description='The swift_driver package',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'lum_drone = luminosity_drone_driver.driver:main',
+            'lum_drone = swift_driver.driver:main',
         ],
     },
 )
