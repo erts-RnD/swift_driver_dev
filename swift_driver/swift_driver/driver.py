@@ -51,8 +51,8 @@ class DroneDriver(Node):
             "yaw": DEFAULT_YAW_VALUE,
             "aux1": 900,
             "aux2": 1500,
-            "aux3": 1500,
-            "aux4": 1500,
+            "aux3": 1000,
+            "aux4": 1200,
         }
 
         self.get_logger().info(f"Node started /{'swift'}")
@@ -97,6 +97,8 @@ class DroneDriver(Node):
         self.CMDS["pitch"] = msg.rc_pitch
         self.CMDS["throttle"] = msg.rc_throttle
         self.CMDS["yaw"] = msg.rc_yaw
+        self.CMDS["aux3"] = msg.aux3
+        self.CMDS["aux4"] = msg.aux4
 
         self.get_logger().info(str(self.CMDS))
 
@@ -134,6 +136,7 @@ class DroneDriver(Node):
         self.CMDS["throttle"] = DEFAULT_THROTTLE_VALUE
         self.CMDS["yaw"] = DEFAULT_YAW_VALUE
         self.CMDS["aux1"] = 1800
+        self.CMDS["aux4"] = 2000
         self.get_logger().info("Drone armed")
         self.get_logger().info(str(self.CMDS))
         # self.read_from_fc()
@@ -145,6 +148,7 @@ class DroneDriver(Node):
     def disarm(self):
         self.get_logger().info("Disarming drone")
         self.CMDS["aux1"] = 1000
+        self.CMDS["aux4"] = 1000 
         self.push_to_fc(None)
 
     def push_to_fc(self, event):
@@ -162,11 +166,11 @@ class DroneDriver(Node):
         # MSP_LOCK.release()
 
 
-    def read_from_fc(self):
+    '''def read_from_fc(self):
         #MSP_LOCK.acquire()
         if hasattr(self, 'FC'):
             self.FC.read_data(self.CMDS)
-        #MSP_LOCK.release()
+        #MSP_LOCK.release()'''
 
 
     @property
@@ -178,6 +182,7 @@ class DroneDriver(Node):
 
 def main(args=None):
     rclpy.init()
+    print(RCMessage)
     print("""
 Interfacing with FC. If it is stuck on this line, potentially it is unable to communicate with the FC. In such a case:
 
@@ -190,7 +195,7 @@ Interfacing with FC. If it is stuck on this line, potentially it is unable to co
         
 
         while rclpy.ok():
-            swift.read_from_fc()
+            #swift.read_from_fc()
             swift.push_to_fc(event=None)
             
             if swift.is_armed:

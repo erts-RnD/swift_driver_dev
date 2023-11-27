@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'lum_drone = swift_driver.driver:main',
+            'driver = swift_driver.driver:main',
         ],
     },
 )
