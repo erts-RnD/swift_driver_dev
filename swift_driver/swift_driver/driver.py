@@ -18,7 +18,10 @@ from swift_msgs.srv import CommandBool
 from yamspy import MSPy
 
 # app imports
-from .utils import FCDriver
+try:
+    from .utils import FCDriver
+except:
+    from swift_driver.utils import FCDriver
 
 SERIAL_PORT = "/dev/ttyS0"
 BAUDRATE = 500000
