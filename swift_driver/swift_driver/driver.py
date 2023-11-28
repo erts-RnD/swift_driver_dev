@@ -148,7 +148,7 @@ class DroneDriver(Node):
     def disarm(self):
         self.get_logger().info("Disarming drone")
         self.CMDS["aux1"] = 1000
-        self.CMDS["aux4"] = 1000 
+        self.CMDS["aux4"] = 1200 
         self.push_to_fc(None)
 
     def push_to_fc(self, event):
