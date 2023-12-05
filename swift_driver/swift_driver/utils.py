@@ -6,7 +6,7 @@ Utilities to run the drone
 from itertools import cycle
 
 import rclpy
-from msg_srv.msg import RCMessage
+from swift_msgs.msg import RCMessage
 from yamspy import MSPy
 
 CMDS_ORDER = ["roll", "pitch", "throttle", "yaw", "aux1", "aux2", "aux3", "aux4"]
@@ -40,29 +40,6 @@ class FCDriver():
             if self.board.send_RAW_msg(MSPy.MSPCodes[msg], data=[]):
                 dataHandler = self.board.receive_msg()
                 self.board.process_recv_data(dataHandler)
-
-    '''def read_data(self):
-        # Read info from the FC
-        slow_msgs = ["MSP_ANALOG", "MSP_STATUS_EX", "MSP_MOTOR", "MSP_RC"]
-        diagnostics = {}
-        for msg in slow_msgs:
-            if self.board.send_RAW_msg(MSPy.MSPCodes[msg], data=[]):
-                dataHandler = self.board.receive_msg()
-                self.board.process_recv_data(dataHandler)
-            if msg == "MSP_ANALOG":
-                diagnostics['voltage'] = self.board.ANALOG["voltage"]
-            elif msg == "MSP_STATUS_EX":
-                diagnostics['armed'] = self.board.bit_check(self.board.CONFIG["mode"], 0)
-                diagnostics['armingDisableFlags'] = self.board.process_armingDisableFlags(self.board.CONFIG['armingDisableFlags'])
-                diagnostics['cpuload'] = self.board.CONFIG['cpuload']
-                diagnostics['cycleTime'] = self.board.CONFIG['cycleTime']
-                diagnostics['mode'] = self.board.CONFIG['mode']
-                diagnostics['flightMode'] = self.board.process_mode(self.board.CONFIG['mode'])
-            elif msg == "MSP_MOTOR":
-                diagnostics['motorValues'] = self.board.MOTOR_DATA
-            elif msg == "MSP_RC":
-                diagnostics['rcChannelsValues'] = self.board.RC['channels']
-        return diagnostics'''
 
 
     def reboot(self):

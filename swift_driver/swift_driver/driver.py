@@ -13,12 +13,15 @@ from timeit import default_timer as timer
 # third-party imports
 import rclpy
 from rclpy.node import Node
-from msg_srv.msg import RCMessage
-from msg_srv.srv import CommandBool
+from swift_msgs.msg import RCMessage
+from swift_msgs.srv import CommandBool
 from yamspy import MSPy
 
 # app imports
-from .utils import FCDriver
+try:
+    from .utils import FCDriver
+except:
+    from swift_driver.utils import FCDriver
 
 SERIAL_PORT = "/dev/ttyS0"
 BAUDRATE = 500000
@@ -38,7 +41,7 @@ print("Staring script...")
 
 class DroneDriver(Node):
     def __init__(self, board):
-        super().__init__('luminosity_drone')
+        super().__init__('swift')
 
         self.board = board
         self.PUSH_TO_FC_COUNT = 0
@@ -51,27 +54,27 @@ class DroneDriver(Node):
             "yaw": DEFAULT_YAW_VALUE,
             "aux1": 900,
             "aux2": 1500,
-            "aux3": 1500,
-            "aux4": 1500,
+            "aux3": 1000,
+            "aux4": 1200,
         }
 
-        self.get_logger().info(f"Node started /{'luminosity_drone'}")
+        self.get_logger().info(f"Node started /{'swift'}")
 
         self.last_msg_received_time = self.get_clock().now().nanoseconds
 
         self.rc_sub = self.create_subscription(
             RCMessage,
-            "/luminosity_drone/rc_command",
+            "/swift/rc_command",
             self.rc_command_topic_callback,
             10
         )
 
         self.arming_srv = self.create_service(
-            CommandBool, "/luminosity_drone/cmd/arming", self.arming_service_callback
+            CommandBool, "/swift/cmd/arming", self.arming_service_callback
         )
 
         self.reboot_srv = self.create_service(
-            CommandBool, "/luminosity_drone/cmd/reboot", self.reboot_service_callback
+            CommandBool, "/swift/cmd/reboot", self.reboot_service_callback
         )
 
         
@@ -97,6 +100,8 @@ class DroneDriver(Node):
         self.CMDS["pitch"] = msg.rc_pitch
         self.CMDS["throttle"] = msg.rc_throttle
         self.CMDS["yaw"] = msg.rc_yaw
+        self.CMDS["aux3"] = msg.aux3
+        self.CMDS["aux4"] = msg.aux4
 
         self.get_logger().info(str(self.CMDS))
 
@@ -134,6 +139,7 @@ class DroneDriver(Node):
         self.CMDS["throttle"] = DEFAULT_THROTTLE_VALUE
         self.CMDS["yaw"] = DEFAULT_YAW_VALUE
         self.CMDS["aux1"] = 1800
+        self.CMDS["aux4"] = 2000
         self.get_logger().info("Drone armed")
         self.get_logger().info(str(self.CMDS))
         # self.read_from_fc()
@@ -145,6 +151,7 @@ class DroneDriver(Node):
     def disarm(self):
         self.get_logger().info("Disarming drone")
         self.CMDS["aux1"] = 1000
+        self.CMDS["aux4"] = 1200 
         self.push_to_fc(None)
 
     def push_to_fc(self, event):
@@ -162,11 +169,11 @@ class DroneDriver(Node):
         # MSP_LOCK.release()
 
 
-    def read_from_fc(self):
+    '''def read_from_fc(self):
         #MSP_LOCK.acquire()
         if hasattr(self, 'FC'):
             self.FC.read_data(self.CMDS)
-        #MSP_LOCK.release()
+        #MSP_LOCK.release()'''
 
 
     @property
@@ -178,6 +185,7 @@ class DroneDriver(Node):
 
 def main(args=None):
     rclpy.init()
+    print(RCMessage)
     print("""
 Interfacing with FC. If it is stuck on this line, potentially it is unable to communicate with the FC. In such a case:
 
@@ -185,26 +193,26 @@ Interfacing with FC. If it is stuck on this line, potentially it is unable to co
 2. check if your batteries are connected to the FC
     """)
     with MSPy(device=SERIAL_PORT, loglevel=LOGLEVEL, baudrate=BAUDRATE) as board:
-        luminosity_drone = DroneDriver(board)
-        luminosity_drone.create_rate(100)
+        swift = DroneDriver(board)
+        swift.create_rate(100)
         
 
         while rclpy.ok():
-            luminosity_drone.read_from_fc()
-            luminosity_drone.push_to_fc(event=None)
+            #swift.read_from_fc()
+            swift.push_to_fc(event=None)
             
-            if luminosity_drone.is_armed:
+            if swift.is_armed:
                 time_diff = (
-                    luminosity_drone.get_clock().now().nanoseconds - luminosity_drone.last_msg_received_time
+                    swift.get_clock().now().nanoseconds - swift.last_msg_received_time
                 )
                 if time_diff > ELAPSED_TIME_FOR_AUTO_DISARM_ON_INACTIVITY:
-                    luminosity_drone.get_logger().info("Inactivity detected")
-                    luminosity_drone.disarm()
-            rclpy.spin_once(luminosity_drone)
+                    swift.get_logger().info("Inactivity detected")
+                    swift.disarm()
+            rclpy.spin_once(swift)
                  
           
             
-    luminosity_drone.destroy_node()
+    swift.destroy_node()
     rclpy.shutdown()
 
 if __name__ == "__main__":
